@@ -18,10 +18,12 @@ new_names = {
 }
 
 
-def parse_args(argv):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('path')
-    return parser.parse_args()
+def load_data():
+    url = 'https://docs.google.com/spreadsheets/d/'
+    sheet_id = '1N9obnCF3fdjq2sOL0uvkVhbhpmZFOtkssXjCdTGfJak'
+    tab_id = '1646235209'
+    path = f'{url}{sheet_id}/export?format=csv&gid={tab_id}'
+    return pd.read_csv(path, parse_dates={'date': ['Date', 'Time']})
 
 
 def clean_names(df):
@@ -49,31 +51,34 @@ def rename_cols(df):
     return df
 
 
+def add_variables(df):
+    df['ym'] = df.date.dt.to_period('M').dt.to_timestamp()
+    return df
+
+
 def order_cols(df):
-    return df[['date', 'desc', 'cat', 'amount', 'name', 'note']]
+    first = ['date', 'desc', 'cat', 'amount', 'name', 'note']
+    rest = sorted(list(set(df.columns) - set(first)))
+    return df[first + rest]
 
 
 def save_data(df):
     ROOTDIR = os.getcwd()
-    PATH = os.path.join(ROOTDIR, 'data', 'clean', 'clean.csv')
-    df.to_csv(PATH)
-
-
-def read_data(path):
-    (pd.read_csv(path, parse_dates={'date': [1, 2]})
-     .pipe(clean_names)
-     .pipe(clean_str)
-     .pipe(select_cols)
-     .pipe(rename_cols)
-     .pipe(order_cols)
-     .pipe(save_data))
+    PATH = os.path.join(ROOTDIR, 'data', 'clean.parquet')
+    df.to_parquet(PATH, compression='BROTLI')
 
 
 def main(argv=None):
-    if argv is None:
-        argv = sys.argv[:1]
-    args = parse_args(argv)
-    read_data(args.path)
+    return (
+        load_data()
+        .pipe(clean_names)
+        .pipe(clean_str)
+        .pipe(select_cols)
+        .pipe(rename_cols)
+        .pipe(add_variables)
+        .pipe(order_cols)
+        .pipe(save_data)
+    )
 
 
 if __name__ == '__main__':
