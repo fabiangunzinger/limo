@@ -14,7 +14,9 @@ new_names = {
     'category': 'cat',
     'amount': 'amount',
     'notes_and_#tags': 'note',
-    'description': 'desc'
+    'description': 'desc',
+    'category_split': 'split',
+    'transaction_id': 'id'
 }
 
 
@@ -23,7 +25,9 @@ def load_data():
     sheet_id = '1N9obnCF3fdjq2sOL0uvkVhbhpmZFOtkssXjCdTGfJak'
     tab_id = '1646235209'
     path = f'{url}{sheet_id}/export?format=csv&gid={tab_id}'
-    return pd.read_csv(path, parse_dates={'date': ['Date', 'Time']})
+    return pd.read_csv(path,
+                       parse_dates={'date': ['Date', 'Time']},
+                       dayfirst=True)
 
 
 def clean_names(df):
