@@ -7,8 +7,12 @@ import os
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+
 import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 import pandas as pd
+
 
 ROOT = os.getcwd()
 PATH = os.path.join(ROOT, 'data', 'clean.parquet')
@@ -18,19 +22,56 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 
-def in_out(df):
-    fig = px.bar(df, x='ym', y='amount',
-                 color=df.amount > 0)
+def drop_transfers(df):
+    transfers = (
+        (df.cat.eq('transfer')) |
+        (df.merch.str.contains(' pot', na=False))
+    )
+    return df[~transfers]
+
+
+def income_spending(df):
+    fig = make_subplots()
+
+    fig.add_trace(
+        go.Bar(
+            x=df[df.amount > 0].ym,
+            y=df[df.amount > 0].amount,
+        )
+    )
+    fig.add_trace(
+        go.Bar(
+            x=df[df.amount < 0].ym,
+            y=df[df.amount < 0].amount,
+            marker_color='indianred'
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=df.groupby('ym').ym.first(),
+            y=df.groupby('ym').amount.sum(),
+            mode='markers',
+            marker=dict(
+                color='green',
+                line_width=2,
+                line_color='white',
+                size=10
+            )
+        )
+    )
     fig.update_layout(
+        barmode='relative',
         xaxis_title='Month',
-        yaxis_title='Spent',
+        yaxis_title='Spending / Income',
         showlegend=False
     )
-    return fig
+    fig.show()
 
 
 df = pd.read_parquet(PATH)
-fig = in_out(df)
+
+preproc = drop_transfers(df)
+fig = income_spending(preproc)
 
 
 app.layout = html.Div(

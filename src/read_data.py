@@ -10,7 +10,7 @@ import pandas as pd
 
 new_names = {
     'date': 'date',
-    'name': 'name',
+    'name': 'merch',
     'category': 'cat',
     'amount': 'amount',
     'notes_and_#tags': 'note',
@@ -61,7 +61,7 @@ def add_variables(df):
 
 
 def order_cols(df):
-    first = ['date', 'desc', 'cat', 'amount', 'name', 'note']
+    first = ['date', 'desc', 'cat', 'amount', 'merch', 'note']
     rest = sorted(list(set(df.columns) - set(first)))
     return df[first + rest]
 
