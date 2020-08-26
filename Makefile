@@ -3,7 +3,7 @@ SHELL := /bin/bash
 ROOTDIR := $(shell pwd)
 
 DATADIR := data
-SRCDIR := src
+CODEDIR := code
 
 RAWDATA := $(DATADIR)/raw.csv
 CLEANDATA := $(DATADIR)/clean.parquet
@@ -16,7 +16,7 @@ CLEANDATA := $(DATADIR)/clean.parquet
 
 data:
 	@echo 'Preparing data.'
-	@python3 $(SRCDIR)/read_data.py
+	@python3 $(CODEDIR)/read_data.py
 
 
 # ----------------------------------------------------------------------------
@@ -24,7 +24,7 @@ data:
 .PHONY: app
 app: $(CLEANDATA)
 	open http://127.0.0.1:8050/
-	python3 $(SRCDIR)/app.py
+	python3 $(CODEDIR)/app.py
 
 
 # ------------------------------------------------------------------------------
