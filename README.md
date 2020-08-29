@@ -1,3 +1,5 @@
 # Next steps
 
-- Learn plotly basics to make basic spending figures
+### Future features
+
+- Plot average monthly spend in year so far for each category to see whether I'm above or below budgeted monthly spend.

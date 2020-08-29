@@ -90,6 +90,20 @@ def group_spending(df):
             paper_bgcolor=colors['backgroundFinances'],
             font_color=colors['text']
         )
+        .add_shape(
+            type='line',
+            yref='y',
+            xref='paper',
+            x0=0,
+            y0=1750,
+            x1=1,
+            y1=1750,
+            line=dict(
+                color="blue",
+                width=4,
+                dash="dashdot",
+            )
+        )
     )
     return fig
 
@@ -124,13 +138,6 @@ app.layout = html.Div(
             }),
 
         dcc.Markdown(intro_text),
-
-        # html.Div(
-        #     children='A simple dashboard to keep track of my spending.',
-        #     style={
-        #         'textAlign': 'center',
-        #     }),
-        #
 
         html.Div(
             style={'backgroundColor': colors['backgroundFinances']},
