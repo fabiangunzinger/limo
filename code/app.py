@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# colors here: https://htmlcolorcodes.com
+
 # visit http://127.0.0.1:8050/ in your web browser.
 import os
 
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 
 import plotly.express as px
 from plotly.subplots import make_subplots
@@ -19,7 +22,8 @@ PATH = os.path.join(ROOT, 'data', 'clean.parquet')
 
 colors = {
     'backgroundMain': '#111111',
-    'backgroundFinances': 'green',
+    'backgroundFinances': '#3498DB',
+    'backgroundExper': '#DC7633',
     'text': '#7FDBFF'
 }
 
@@ -123,12 +127,10 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 
 app.layout = html.Div(
-
     style={
         'backgroundColor': colors['backgroundMain'],
         'color': colors['text']
     },
-
     children=[
 
         html.H1(
@@ -156,9 +158,51 @@ app.layout = html.Div(
 
         html.Div(
             'Hello world. Some more text here.'
+        ),
+
+        html.Div(
+            style={'backgroundColor': colors['backgroundExper']},
+            children=[
+                html.H3('Experimental'),
+
+                dcc.Dropdown(
+                    id='selector',
+                    options=[
+                        {'label': '2019', 'value': 2019},
+                        {'label': '2020', 'value': 2020},
+                    ],
+                    multi=False,
+                    value=2019,
+                    style={'width': '40%'},
+                ),
+
+                html.Div(id='announcer', children=[]),
+
+                dcc.Graph(id='monthly_spend', figure={})
+            ]
         )
 
     ])
+
+
+@app.callback(
+    [Output(component_id='announcer', component_property='children'),
+     Output(component_id='monthly_spend', component_property='figure')],
+    [Input(component_id='selector', component_property='value')]
+)
+def graph_updater(year):
+
+    print(f'Year selected: {year}')
+
+    announcement = f'Year selected is: {year}'
+
+    dd = df.copy()
+    dd = dd[dd.date.dt.year.eq(year)]
+    dd = drop_transfers(dd)
+    dd = make_credit_data(dd)
+    fig = group_spending(dd)
+
+    return announcement, fig
 
 
 if __name__ == '__main__':
