@@ -75,11 +75,11 @@ def order_cols(df):
     return df[first + rest]
 
 
-def save_data(df):
-    ROOTDIR = '/Users/fgu/Library/Mobile Documents/com~apple~CloudDocs/fab/projects/limo'
-    PATH = os.path.join(ROOTDIR, 'data', 'clean.parquet')
-    df.to_parquet(PATH, compression='BROTLI')
-    return df
+# def save_data(df):
+#     ROOTDIR = '/Users/fgu/Library/Mobile Documents/com~apple~CloudDocs/fab/projects/limo'
+#     PATH = os.path.join(ROOTDIR, 'data', 'clean.parquet')
+#     df.to_parquet(PATH, compression='BROTLI')
+#     # return df
 
 
 def read_monzo():
@@ -92,13 +92,12 @@ def read_monzo():
         .pipe(categorise_transfers)
         .pipe(invert_amounts)
         .pipe(order_cols)
-        .pipe(save_data)
     )
 
-
-def main(argv=None):
-    return read_monzo()
-
-
-if __name__ == '__main__':
-    sys.exit(main())
+#
+# def main(argv=None):
+#     return read_monzo()
+#
+#
+# if __name__ == '__main__':
+#     sys.exit(main())
