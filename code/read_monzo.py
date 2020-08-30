@@ -2,25 +2,12 @@
 # -*- coding: utf-8 -*-
 
 
-import argparse
 import os
 import sys
 import pandas as pd
 
 
-new_names = {
-    'date': 'date',
-    'name': 'merch',
-    'category': 'cat',
-    'amount': 'amount',
-    'notes_and_#tags': 'note',
-    'description': 'desc',
-    'category_split': 'split',
-    'transaction_id': 'id'
-}
-
-
-def load_data():
+def fetch_raw():
     url = 'https://docs.google.com/spreadsheets/d/'
     sheet_id = '1N9obnCF3fdjq2sOL0uvkVhbhpmZFOtkssXjCdTGfJak'
     tab_id = '1646235209'
@@ -46,17 +33,39 @@ def clean_str(df):
     return df
 
 
-def select_cols(df):
-    return df[new_names]
+def select_rename_cols(df):
+    new_names = {
+        'date': 'date',
+        'name': 'merch',
+        'category': 'cat',
+        'amount': 'amount',
+        'notes_and_#tags': 'note',
+        'description': 'desc',
+        'category_split': 'split',
+        'transaction_id': 'id',
+        'type': 'type',
+    }
+    df = df[new_names]
+    return df.rename(columns=new_names)
 
 
-def rename_cols(df):
-    df = df.rename(columns=new_names)
+def add_year_month(df):
+    df['ym'] = df.date.dt.to_period('M').dt.to_timestamp()
     return df
 
 
-def add_variables(df):
-    df['ym'] = df.date.dt.to_period('M').dt.to_timestamp()
+def categorise_transfers(df):
+    mask = (
+        (df.cat.eq('transfer')) |
+        (df.type.eq('pot transfer')) |
+        (df.note.eq('fgtofg'))
+    )
+    df.loc[mask, 'cat'] = 'transfer'
+    return df
+
+
+def invert_amounts(df):
+    df['amount'] = df.amount * -1
     return df
 
 
@@ -67,22 +76,28 @@ def order_cols(df):
 
 
 def save_data(df):
-    ROOTDIR = os.getcwd()
+    ROOTDIR = '/Users/fgu/Library/Mobile Documents/com~apple~CloudDocs/fab/projects/limo'
     PATH = os.path.join(ROOTDIR, 'data', 'clean.parquet')
     df.to_parquet(PATH, compression='BROTLI')
+    return df
 
 
-def main(argv=None):
+def read_monzo():
     return (
-        load_data()
+        fetch_raw()
         .pipe(clean_names)
         .pipe(clean_str)
-        .pipe(select_cols)
-        .pipe(rename_cols)
-        .pipe(add_variables)
+        .pipe(select_rename_cols)
+        .pipe(add_year_month)
+        .pipe(categorise_transfers)
+        .pipe(invert_amounts)
         .pipe(order_cols)
         .pipe(save_data)
     )
+
+
+def main(argv=None):
+    return read_monzo()
 
 
 if __name__ == '__main__':

@@ -16,7 +16,7 @@ CLEANDATA := $(DATADIR)/clean.parquet
 
 data:
 	@echo 'Preparing data.'
-	@python3 $(CODEDIR)/read_data.py
+	@python3 $(CODEDIR)/read_monzo.py
 
 
 # ----------------------------------------------------------------------------
