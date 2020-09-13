@@ -58,6 +58,7 @@ app.layout = html.Div(
                 dcc.Dropdown(
                     id='selector',
                     options=[
+                        {'label': 'Sep 2020', 'value': '2020-09'},
                         {'label': 'Aug 2020', 'value': '2020-08'},
                         {'label': 'July 2020', 'value': '2020-07'},
                     ],
