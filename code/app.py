@@ -85,9 +85,9 @@ app.layout = html.Div(
      Output(component_id='budget_checker', component_property='figure')],
     [Input(component_id='selector', component_property='value')]
 )
-def updater(ym):
-    fig = make_budget_check_fig(ym)
-    announcement = f'Period selected is: {ym}'
+def updater(month):
+    fig = make_budget_check_fig(month)
+    announcement = f'Period selected is: {month}'
     return announcement, fig
 
 

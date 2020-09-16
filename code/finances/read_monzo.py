@@ -49,8 +49,8 @@ def select_rename_cols(df):
     return df.rename(columns=new_names)
 
 
-def add_year_month(df):
-    df['ym'] = df.date.dt.to_period('M').dt.to_timestamp()
+def add_month(df):
+    df['month'] = df.date.dt.to_period('M').dt.to_timestamp()
     return df
 
 
@@ -75,7 +75,7 @@ def order_cols(df):
     return df[first + rest]
 
 
-# def save_data(df):
+# def save_data(df
 #     ROOTDIR = '/Users/fgu/Library/Mobile Documents/com~apple~CloudDocs/fab/projects/limo'
 #     PATH = os.path.join(ROOTDIR, 'data', 'clean.parquet')
 #     df.to_parquet(PATH, compression='BROTLI')
@@ -88,7 +88,7 @@ def read_monzo():
         .pipe(clean_names)
         .pipe(clean_str)
         .pipe(select_rename_cols)
-        .pipe(add_year_month)
+        .pipe(add_month)
         .pipe(categorise_transfers)
         .pipe(invert_amounts)
         .pipe(order_cols)

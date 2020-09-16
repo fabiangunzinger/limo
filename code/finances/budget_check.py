@@ -4,10 +4,10 @@ from finances.read_monzo import read_monzo
 from finances.read_budget import read_budget
 
 
-def make_data(ym='2020-08'):
+def make_data(month='2020-08'):
     monzo = (
         read_monzo()
-        .loc[lambda df: df.ym.eq(ym)]
+        .loc[lambda df: df.month.eq(month)]
         .rename(columns={'amount': 'actual'})
         .pivot_table(values='actual', index='cat', aggfunc='sum')
         .reset_index()
@@ -75,5 +75,5 @@ def make_figure(df):
     return fig
 
 
-def make_budget_check_fig(ym):
-    return make_figure(make_data(ym))
+def make_budget_check_fig(month):
+    return make_figure(make_data(month))

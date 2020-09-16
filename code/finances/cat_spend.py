@@ -7,26 +7,26 @@ def cat_spend_data():
     monzo = read_monzo()
     return (
         monzo
-        .pivot_table('amount', 'ym', 'cat', aggfunc='sum', fill_value=0)
+        .pivot_table('amount', 'month', 'cat', aggfunc='sum', fill_value=0)
         .reset_index()
-        .melt(id_vars=['ym'], value_name='amount')
+        .melt(id_vars=['month'], value_name='amount')
     )
 
 
 def cat_spend_figure(df):
-    g = df.groupby('ym')
+    g = df.groupby('month')
     fig = (
         px.bar(
             df,
-            x='ym',
+            x='month',
             y='amount',
             color='cat',
             template='simple_white',
             hover_name='cat',
-            # hover_data=['ym', 'amount']
+            # hover_data=['month', 'amount']
         )
         .add_scatter(
-            x=g.ym.first(),
+            x=g.month.first(),
             y=g.amount.mean(),
             showlegend=False,
             mode='markers',
