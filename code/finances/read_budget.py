@@ -8,9 +8,9 @@ import pandas as pd
 
 
 def fetch_raw():
-    url = 'https://docs.google.com/spreadsheets/d/'
-    sheet_id = '1_9FpBQqUFgx3JwJVpR2iXfPcjDTeGIZikLRaPUblpSM'
-    tab_id = '978079042'
+    url = os.environ.get('BUDGET_URL')
+    sheet_id = os.environ.get('BUDGET_SHEETID')
+    tab_id = os.environ.get('BUDGET_TABID')
     path = f'{url}{sheet_id}/export?format=csv&gid={tab_id}'
     return pd.read_csv(path)
 

@@ -8,9 +8,9 @@ import pandas as pd
 
 
 def fetch_raw():
-    url = 'https://docs.google.com/spreadsheets/d/'
-    sheet_id = '1N9obnCF3fdjq2sOL0uvkVhbhpmZFOtkssXjCdTGfJak'
-    tab_id = '1646235209'
+    url = os.environ.get('MONZO_URL')
+    sheet_id = os.environ.get('MONZO_SHEETID')
+    tab_id = os.environ.get('MONZO_TABID')
     path = f'{url}{sheet_id}/export?format=csv&gid={tab_id}'
     return pd.read_csv(path,
                        parse_dates={'date': ['Date', 'Time']},
