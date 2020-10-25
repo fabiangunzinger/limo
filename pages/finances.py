@@ -70,7 +70,6 @@ def create_layout(app):
 
 
 def register_callbacks(app):
-
     @app.callback(
         [Output(component_id='informer', component_property='children'),
          Output(component_id='budget_checker', component_property='figure')],
