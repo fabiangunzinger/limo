@@ -12,9 +12,8 @@ def fetch_raw():
     sheet_id = os.environ.get('MONZO_SHEETID')
     tab_id = os.environ.get('MONZO_TABID')
     path = f'{url}{sheet_id}/export?format=csv&gid={tab_id}'
-    return pd.read_csv(path,
-                       parse_dates={'date': ['Date', 'Time']},
-                       dayfirst=True)
+    return pd.read_csv(path, dayfirst=True,
+                       parse_dates={'date': ['Date', 'Time']})
 
 
 def clean_names(df):
@@ -75,13 +74,6 @@ def order_cols(df):
     return df[first + rest]
 
 
-# def save_data(df
-#     ROOTDIR = '/Users/fgu/Library/Mobile Documents/com~apple~CloudDocs/fab/projects/limo'
-#     PATH = os.path.join(ROOTDIR, 'data', 'clean.parquet')
-#     df.to_parquet(PATH, compression='BROTLI')
-#     # return df
-
-
 def read_monzo():
     return (
         fetch_raw()
@@ -94,10 +86,10 @@ def read_monzo():
         .pipe(order_cols)
     )
 
-#
-# def main(argv=None):
-#     return read_monzo()
-#
-#
-# if __name__ == '__main__':
-#     sys.exit(main())
+
+def main(argv=None):
+    return read_monzo()
+
+
+if __name__ == '__main__':
+    sys.exit(main())
