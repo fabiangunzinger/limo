@@ -4,7 +4,7 @@ A Dash dashboard to help me track my finances and -- eventually -- other life me
 
 
 ## Next
-- Make month start on 25th or latest business day before.
+- [x] Make month start on 25th or latest business day before.
 
 - Start health (sleep, training, blood values)
 

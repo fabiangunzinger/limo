@@ -131,7 +131,7 @@ budget = read_budget()
 def monthly_overview():
     """Overview of monthly spend by category for the last n months."""
     df = (
-        read_monzo()
+        monzo
         .pivot_table('amount', 'month', 'category',
                      aggfunc='sum', fill_value=0)
         .reset_index()
@@ -202,7 +202,7 @@ def monthly_overview():
 
 def budget_check(month='2020-08'):
     monzo_pivot = (
-        read_monzo()
+        monzo
         .loc[lambda df: df.month.eq(month)]
         .rename(columns={'amount': 'actual'})
         .pivot_table(values='actual', index='category', aggfunc='sum')
@@ -210,7 +210,7 @@ def budget_check(month='2020-08'):
     )
     df = (
         monzo_pivot
-        .merge(read_budget(), how='right')
+        .merge(budget, how='right')
         .fillna(0)
         .melt(id_vars=['category'], var_name='var', value_name='amount')
         .sort_values(['var', 'amount'], ascending=True)
