@@ -55,9 +55,9 @@ def create_layout(app):
                         value='2020-10',
                         style={'width': '40%'},
                     ),
-                    html.Div('hel',
-                             id='informer'
-                             ),
+                    html.Div(
+                        id='informer'
+                    ),
                     dcc.Graph(
                         id='budget_checker',
                         figure={},
@@ -70,7 +70,7 @@ def create_layout(app):
 
 
 def register_callbacks(app):
-    @app.callback(
+    @ app.callback(
         [Output(component_id='informer', component_property='children'),
          Output(component_id='budget_checker', component_property='figure')],
         [Input(component_id='selector', component_property='value')]
@@ -86,9 +86,9 @@ def read_budget():
     sheet_id = os.environ.get('BUDGET_SHEETID')
     tab_id = os.environ.get('BUDGET_TABID')
     path = f'{url}{sheet_id}/export?format=csv&gid={tab_id}'
-    df = pd.read_csv(path, usecols=[0, 1], names=['cat', 'budget'],
+    df = pd.read_csv(path, usecols=[0, 1], names=['category', 'budget'],
                      skiprows=27, skipfooter=35, engine='python',
-                     converters={'cat': str.lower})
+                     converters={'category': str.lower})
     return df
 
 
@@ -97,37 +97,43 @@ def read_monzo():
     sheet_id = os.environ.get('MONZO_SHEETID')
     tab_id = os.environ.get('MONZO_TABID')
     path = f'{url}{sheet_id}/export?format=csv&gid={tab_id}'
-    df = pd.read_csv(path, dayfirst=True,
-                     parse_dates={'date': ['Date', 'Time']})
+    df = (pd.read_csv(path, dayfirst=True,
+                      parse_dates={'date': ['Date', 'Time']}))
 
-    new_names = {'date': 'date', 'name': 'merch', 'category': 'cat',
-                 'amount': 'amount', 'notes_and_#tags': 'note',
-                 'description': 'desc', 'category_split': 'split',
-                 'transaction_id': 'id', 'type': 'type'}
-    df.columns = df.columns.str.lower().str.replace(' ', '_')
-    df = df[new_names].rename(columns=new_names)
+    df.columns = (df.columns.str.lower()
+                  .str.replace(' ', '_')
+                  .str.replace('#', ''))
 
     strs = df.select_dtypes('object')
     df[strs.columns] = strs.apply(lambda x: x.str.lower())
-
-    df['month'] = df.date.dt.to_period('M').dt.to_timestamp()
     df['amount'] = df.amount.mul(-1)
 
+    # monthly variable with new month starting on 25th
+    shift = pd.TimedeltaIndex(df.date.dt.daysinmonth - 25 + 1, unit='D')
+    shifted = df.date + shift
+    df['month'] = shifted.dt.to_period('M').dt.to_timestamp()
+
+    # categorise transfers
     mask = (
-        (df.cat.eq('transfer')) |
+        (df.category.eq('transfer')) |
         (df.type.eq('pot transfer')) |
-        (df.note.eq('fgtofg'))
+        (df.notes_and_tags.eq('fgtofg'))
     )
-    df.loc[mask, 'cat'] = 'transfer'
+    df.loc[mask, 'category'] = 'transfer'
 
     return df
+
+
+monzo = read_monzo()
+budget = read_budget()
 
 
 def monthly_overview():
     """Overview of monthly spend by category for the last n months."""
     df = (
         read_monzo()
-        .pivot_table('amount', 'month', 'cat', aggfunc='sum', fill_value=0)
+        .pivot_table('amount', 'month', 'category',
+                     aggfunc='sum', fill_value=0)
         .reset_index()
         .melt(id_vars=['month'], value_name='amount')
     )
@@ -137,10 +143,9 @@ def monthly_overview():
             df,
             x='month',
             y='amount',
-            color='cat',
+            color='category',
             template='simple_white',
-            hover_name='cat',
-            # hover_data=['month', 'amount']
+            hover_name='category',
         )
         .add_scatter(
             x=g.month.first(),
@@ -196,26 +201,25 @@ def monthly_overview():
 
 
 def budget_check(month='2020-08'):
-    monzo = (
+    monzo_pivot = (
         read_monzo()
         .loc[lambda df: df.month.eq(month)]
         .rename(columns={'amount': 'actual'})
-        .pivot_table(values='actual', index='cat', aggfunc='sum')
+        .pivot_table(values='actual', index='category', aggfunc='sum')
         .reset_index()
     )
-
     df = (
-        monzo
+        monzo_pivot
         .merge(read_budget(), how='right')
         .fillna(0)
-        .melt(id_vars=['cat'], var_name='var', value_name='amount')
+        .melt(id_vars=['category'], var_name='var', value_name='amount')
         .sort_values(['var', 'amount'], ascending=True)
     )
     fig = (
         px.scatter(
             df,
             x='amount',
-            y='cat',
+            y='category',
             color='var',
             color_discrete_sequence=[
                 'rgba(156, 165, 196, 0.95)',
