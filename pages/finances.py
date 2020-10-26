@@ -132,15 +132,17 @@ def monthly_overview():
     """Overview of monthly spend by category for the last n months."""
     df = (
         monzo
+        [~monzo.category.isin(['general', 'transfer'])]
         .pivot_table('amount', 'month', 'category',
                      aggfunc='sum', fill_value=0)
         .reset_index()
         .melt(id_vars=['month'], value_name='amount')
     )
+    inc = df[df.category.eq('income')]
     g = df.groupby('month')
     fig = (
         px.bar(
-            df,
+            df[~df.category.eq('income')],
             x='month',
             y='amount',
             color='category',
@@ -148,8 +150,8 @@ def monthly_overview():
             hover_name='category',
         )
         .add_scatter(
-            x=g.month.first(),
-            y=g.amount.mean(),
+            x=inc.month,
+            y=inc.amount.mul(-1),
             showlegend=False,
             mode='markers',
             marker=dict(
