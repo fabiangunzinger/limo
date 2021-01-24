@@ -37,7 +37,11 @@ def clean_monzo(df):
     df['amount'] = df.amount.mul(-1)
 
     # classify pot ans 'hsbc help to buy' transfers as savings
-    savings = (df.type == 'pot transfer') | (df.desc == 'help to buy')
+    savings = (
+        (df.type == 'pot transfer')
+        | (df.desc == 'help to buy')
+        | (df.desc == 'fgtofg')
+    )
     df['cat'] = np.where(savings, 'savings', df.cat)
     
     # make income count for next month 
@@ -56,8 +60,8 @@ def read_budget():
     sheet_id = os.environ.get('BUDGET_SHEETID')
     tab_id = os.environ.get('BUDGET_TABID')
     path = f'{url}{sheet_id}/export?format=csv&gid={tab_id}'
-    df = pd.read_csv(path, usecols=[0, 1], names=['category', 'budget'],
+    df = pd.read_csv(path, usecols=[0, 1], names=['cat', 'budget'],
                      skiprows=27, skipfooter=35, engine='python',
-                     converters={'category': str.lower})
+                     converters={'cat': str.lower})
     return df
 
